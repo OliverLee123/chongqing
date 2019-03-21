@@ -26,6 +26,21 @@ def test_raster():
     test = raster.Raster(workspace_path, road, lines, lines_level, areas, areas_level, max_level, weight_field, pt_path, output_path)
     zip_path = test.processing()
     
+def test_poi_corrcet(extracted_area,poi_region,out_path):
+    #arcpy.Intersect_analysis([extracted_area,poi_region], 'temp.shp')
+    arcpy.MakeFeatureLayer_management(poi_region,'selected_area')
+    arcpy.SelectLayerByLocation_management('selected_area','CROSSED_BY_THE_OUTLINE_OF',extracted_area)
+    arcpy.Erase_analysis('selected_area', extracted_area, 'temp.shp')
+    arcpy.Union_analysis([extracted_area,'temp.shp'],'temp_1.shp')
+    arcpy.Dissolve_management('temp_1.shp','temp_2')
+    if os.path.isfile(workspace_path +'\\'+out_path):
+        print('File exists.Overwrite the original shp')
+        arcpy.Delete_management(out_path)
+    arcpy.Erase_analysis('temp_2.shp', '\\data\\waterregion.shp', out_path)
+    arcpy.Delete_management('temp.shp')
+    arcpy.Delete_management('temp_1.shp')
+    arcpy.Delete_management('temp_2.shp')
+    
 if __name__ == '__main__':
     # set the max iteration
     sys.setrecursionlimit(10000000)
